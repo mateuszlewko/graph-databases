@@ -1,0 +1,65 @@
+# 1. List motto texts (wdt:P1451) of all states of the United States.
+
+SELECT ?state ?stateLabel ?motto 
+WHERE
+{
+    ?state wdt:P31 wd:Q35657 .
+    ?state wdt:P1451 ?motto .
+     
+   SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+# 2. List Q-numbers and (english) names of all Noble Prize winners 
+#    that were born in Wrocław.
+
+SELECT ?person ?personLabel ?prize ?prizeLabel
+WHERE
+{
+  	?person wdt:P19 wd:Q1799. # wroclaw
+    ?prize wdt:P361 wd:Q7191. # is part of nobel prize
+    ?person wdt:P166 ?prize.  # person received nobel prize
+  
+   SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+# 3. List all persons that were born in Poland and died at a place at the 
+#    elevation above 8000 metres above sea level (be careful with units!).
+
+SELECT ?person ?personLabel ?podLabel ?pobLabel ?elev ?dod
+WHERE
+{
+  ?person wdt:P19 ?pob.
+  ?pob wdt:P17 wd:Q36 . 
+  
+  ?person wdt:P20 ?pod.
+  ?pod p:P2044/psn:P2044/wikibase:quantityAmount ?elev filter(?elev > 8000).
+
+  ?person wdt:P570 ?dod
+ 
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+}
+ORDER BY DESC (?dod)
+
+# 4. List 10 polish cities with the biggest number of scientists 
+#    (according to their place of birth). Show the names of the cities 
+#    and the number of scientists. Sort the cities in descending order.
+
+SELECT ?place ?placeLabel (COUNT(DISTINCT(?person)) as ?count) 
+WHERE {
+  ?person wdt:P19 ?place.
+  ?place wdt:P17 wd:Q36.
+  ?person wdt:P106 ?occupation.
+  ?occupation wdt:P279 wd:Q901.
+  
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+GROUP BY ?place ?placeLabel
+ORDER BY DESC (?count)
+LIMIT 10
