@@ -54,9 +54,9 @@ ORDER BY DESC (?dod)
 SELECT ?place ?placeLabel (COUNT(DISTINCT(?person)) as ?count) 
 WHERE {
   ?person wdt:P19 ?place.
-  ?place wdt:P17 wd:Q36.
+  ?place wdt:P17 wd:Q36. # country
   ?person wdt:P106 ?occupation.
-  ?occupation wdt:P279 wd:Q901.
+  ?occupation wdt:P279 wd:Q901. # subclass
   
   SERVICE wikibase:label { 
     bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
