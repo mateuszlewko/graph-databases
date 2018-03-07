@@ -1,0 +1,72 @@
+# 1. Find all things that have been named after (P138) any president of 
+#    Poland (Q1054799). For each such thing return this 
+#    thing (e.g., wd:Q315658), its label in Polish 
+#    (e.g., Uniwersytet Wrocławski) and the name of the 
+#    president (e.g., Bolesław Bierut).
+
+SELECT ?thing ?thingLabel ?president ?presidentLabel
+WHERE
+{
+    ?president wdt:P39 wd:Q1054799 .
+    ?thing wdt:P138 ?president .
+     
+   SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+# 2. Find all popes with a child that was a pope too.
+
+SELECT ?pope ?popeLabel ?popeChildLabel
+WHERE
+{
+  	?pope wdt:P39 wd:Q19546. 
+    ?pope wdt:P40 ?popeChild.
+    ?popeChild wdt:P39 wd:Q19546.
+  
+   SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+# 3. Find all popes without children, i.e., either their P40 property
+#    has value no value (as in the lecture wdno:P40) or they don't 
+#    have P40 property at all.
+
+SELECT ?pope ?popeLabel
+WHERE
+{  
+    {
+  	  ?pope wdt:P39 wd:Q19546. 
+      ?pope p:P40 ?child .
+      ?child rdf:type wdno:P40 .
+    } UNION {
+      ?pope wdt:P39 wd:Q19546. 
+      ?pope p:P40 ?child .
+      FILTER (!BOUND(?child)).
+    }
+   
+   SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+# 4. List 10 polish cities with the biggest number of scientists 
+#    (according to their place of birth). Show the names of the cities 
+#    and the number of scientists. Sort the cities in descending order.
+
+SELECT ?place ?placeLabel (COUNT(DISTINCT(?person)) as ?count) 
+WHERE {
+  ?person wdt:P19 ?place.
+  ?place wdt:P17 wd:Q36. # country
+  ?person wdt:P106 ?occupation.
+  ?occupation wdt:P279 wd:Q901. # subclass
+  
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+GROUP BY ?place ?placeLabel
+ORDER BY DESC (?count)
+LIMIT 10
