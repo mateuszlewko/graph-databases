@@ -51,22 +51,29 @@ WHERE
   }
 }
 
-# 4. List 10 polish cities with the biggest number of scientists 
-#    (according to their place of birth). Show the names of the cities 
-#    and the number of scientists. Sort the cities in descending order.
+# 4. Consider politicians that have a label in Polish language, were 
+#    born in Poland but have some other citizenship. For each such citizenship 
+#    (other that Polish) return the number of such politicians.
 
-SELECT ?place ?placeLabel (COUNT(DISTINCT(?person)) as ?count) 
-WHERE {
-  ?person wdt:P19 ?place.
-  ?place wdt:P17 wd:Q36. # country
-  ?person wdt:P106 ?occupation.
-  ?occupation wdt:P279 wd:Q901. # subclass
+# 5. Find all universities that are at most 200 km from Wrocław and are 
+#    not in Poland. Visualize them on a map. (look at the airport example).
+
+SELECT ?place ?placeLabel ?placeCountryLabel ?location
+WHERE
+{
+  wd:Q1799 wdt:P625 ?wrocLoc .
   
-  SERVICE wikibase:label { 
-    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
-  }
+  SERVICE wikibase:around {
+    ?place wdt:P625 ?location .
+    bd:serviceParam wikibase:center ?wrocLoc .
+    bd:serviceParam wikibase:radius "200" .
+  } .
+  
+  FILTER EXISTS { ?place wdt:P31/wdt:P279* wd:Q3918 } .
+  ?place wdt:P17 ?placeCountry.
+  FILTER (?placeCountry != wd:Q36) .
+  
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+  } 
 }
-
-GROUP BY ?place ?placeLabel
-ORDER BY DESC (?count)
-LIMIT 10
