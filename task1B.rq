@@ -69,6 +69,7 @@ WHERE
 }
 
 GROUP BY ?citiCountryLabel
+
 # 5. Find all universities that are at most 200 km from Wrocław and are 
 #    not in Poland. Visualize them on a map. (look at the airport example).
 
