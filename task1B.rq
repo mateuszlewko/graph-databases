@@ -55,6 +55,20 @@ WHERE
 #    born in Poland but have some other citizenship. For each such citizenship 
 #    (other that Polish) return the number of such politicians.
 
+SELECT ?citiCountryLabel (COUNT(?citiCountryLabel) as ?count)
+WHERE
+{
+  ?person wdt:P19 ?pob.
+  ?pob wdt:P17 wd:Q36 . 
+  ?person wdt:P27 ?citiCountry .
+  FILTER (?citiCountry != wd:Q36) .
+ 
+  SERVICE wikibase:label { 
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". 
+  }
+}
+
+GROUP BY ?citiCountryLabel
 # 5. Find all universities that are at most 200 km from Wrocław and are 
 #    not in Poland. Visualize them on a map. (look at the airport example).
 
