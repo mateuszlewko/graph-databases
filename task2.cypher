@@ -32,3 +32,41 @@ RETURN apoc.date.fields(tw.created_str, "yyyy-MM-dd HH:mm:ss").months as month
      , apoc.date.fields(tw.created_str, "yyyy-MM-dd HH:mm:ss").years as year
      , count(*)
 ORDER BY year, month
+
+// 5. List the number of tweers per hour (24 results, one per hour), consider 
+//    tweets only by users declaring location in USA, compare with Moscow 
+//    business hours.
+
+MATCH (u:User)-[:POSTED]->(tw:Tweet)
+WHERE tw.created_str <> "" AND u.location = "USA"
+RETURN apoc.date.fields(tw.created_str, "yyyy-MM-dd HH:mm:ss").hours as hour
+     , count(*)
+ORDER BY hour
+
+// 6. Find the shortest path between the users: 
+//    @realdonaldtrump and @hillaryclinton.
+
+MATCH (t:User { user_key: 'realdonaldtrump' })
+    , (h:User { user_key: 'hillaryclinton' })
+    , p = shortestPath((t)-[*]-(h))
+RETURN p
+
+// 7. Extend the database with relationship of type :CITES between trolls: 
+//    we say that a troll :CITES another troll if the former retweeted some
+//    tweet(s) by the latter.
+
+MATCH (t1:Troll)-[:POSTED]->(tw:Tweet)-[:RETWEETED]-
+      (tw2:Tweet)<-[:POSTED]-(t2:Troll)
+CREATE (t1)-[:CITES]->(t2)
+//RETURN t1.user_key, t2.user_key
+
+// 8. Use algo.labelPropagation algorithm to partition trolls into communities.
+CALL apoc.algo.community (null,'partition','POSTED','OUTGOING','weight',10000)
+
+// 9. Find the most popular hashtags for each of the communities computed in 
+//    the previous step
+
+MATCH (t:Troll), (t2:Troll)
+WHERE t.partition = t2.partition AND t.user_key <> t2.user_key
+RETURN t.user_key, t2.user_key
+LIMIT 100
