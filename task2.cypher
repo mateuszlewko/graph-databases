@@ -7,11 +7,17 @@ RETURN node.location, COUNT(node.location) AS num
 ORDER BY num DESC
 LIMIT 10
 
+MATCH (t:Troll)-[:POSTED]->(tw:Tweet)-[:CONTAINTS_ENITY]->(loc:Location)
+//WHERE node.location <> ""
+RETURN loc, COUNT(loc) AS num
+ORDER BY num DESC
+LIMIT 10
+
 // 2. List 10 trolls that have been mentioned by the largest number of tweets.
 
 MATCH (tw:Tweet)-[:MENTIONS]->(t2:Troll)
-WHERE t2.name <> ""
-RETURN t2.name, COUNT(t2) AS num
+// WHERE t2.name <> ""
+RETURN t2.screen_name, COUNT(t2) AS num
 ORDER BY num DESC
 LIMIT 10
 
@@ -65,12 +71,14 @@ CALL apoc.algo.community(25, null,'partition','CITES','OUTGOING','weight',10000)
 //    the previous step
 
 MATCH (t1:Troll)-[:POSTED]->(tw:Tweet)-[:HAS_TAG]->(ht:Hashtag)
-WITH t1.partition as part, ht.tag as tg, count(ht.tag) as cnt
-RETURN part, tg, max(cnt) as mcnt
-ORDER BY mcnt DESC
+WITH t1.partition as part, ht.tag as tg, count(tw) as cnt
+WITH part, tg, max(cnt) as mcnt
+RETURN part, max({_cnt : mcnt, tag: tg}).tag
+ORDER BY part
 
-// 10. 
+// 10. Most popular hashtags in tweets (which mention HC) posted by trolls 
+
 MATCH (t1:Troll)-[:POSTED]->(tw:Tweet)-[:HAS_TAG]->(ht:Hashtag)
 MATCH (tw)-[:MENTIONS]-(h:User {user_key: "hillaryclinton"})
-RETURN ht.tag, count(ht.tag) AS cnt
+RETURN ht.tag, count(tw) AS cnt
 ORDER BY cnt DESC
