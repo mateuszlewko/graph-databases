@@ -17,10 +17,8 @@ LIMIT 10
 
 // 3. List 10 trolls that have been mentioned by the largest number of users. 
 
-// ??
 MATCH (u:User)-[:POSTED]->(tw:Tweet)-[:MENTIONS]->(t2:Troll)
-WHERE t2.name <> ""
-RETURN t2.name, COUNT(t2) AS num
+RETURN t2.screen_name, COUNT(distinct u) AS num
 ORDER BY num DESC
 LIMIT 10
 
@@ -61,12 +59,18 @@ CREATE (t1)-[:CITES]->(t2)
 //RETURN t1.user_key, t2.user_key
 
 // 8. Use algo.labelPropagation algorithm to partition trolls into communities.
-CALL apoc.algo.community (null,'partition','POSTED','OUTGOING','weight',10000)
+CALL apoc.algo.community(25, null,'partition','CITES','OUTGOING','weight',10000)
 
 // 9. Find the most popular hashtags for each of the communities computed in 
 //    the previous step
 
-MATCH (t:Troll), (t2:Troll)
-WHERE t.partition = t2.partition AND t.user_key <> t2.user_key
-RETURN t.user_key, t2.user_key
-LIMIT 100
+MATCH (t1:Troll)-[:POSTED]->(tw:Tweet)-[:HAS_TAG]->(ht:Hashtag)
+WITH t1.partition as part, ht.tag as tg, count(ht.tag) as cnt
+RETURN part, tg, max(cnt) as mcnt
+ORDER BY mcnt DESC
+
+// 10. 
+MATCH (t1:Troll)-[:POSTED]->(tw:Tweet)-[:HAS_TAG]->(ht:Hashtag)
+MATCH (tw)-[:MENTIONS]-(h:User {user_key: "hillaryclinton"})
+RETURN ht.tag, count(ht.tag) AS cnt
+ORDER BY cnt DESC
