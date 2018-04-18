@@ -35,7 +35,6 @@ g.V().has('country', 'PL')                       \
      .by(inE('route').count())                   \
      .by(outE('route').count())                  
 
-
 // Task 8.
 g.V().has('country', 'PL')                       \
      .has('type','airport')                      \
