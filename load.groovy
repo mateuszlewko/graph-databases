@@ -1,4 +1,4 @@
-// To execute use the console command ":load load-data.groovy"
+// To execute use the console command ":load load.groovy"
 //
 
 conf = new BaseConfiguration()
